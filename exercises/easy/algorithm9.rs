@@ -1,11 +1,11 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-
 
 use std::cmp::Ord;
 use std::default::Default;
+use std::mem;
 
 pub struct Heap<T>
 where
@@ -37,7 +37,20 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        let mut idx = self.len();
+
+        #[allow(irrefutable_let_patterns)]
+        while let pdx = self.parent_idx(idx) {
+            if pdx == 0 {
+                return;
+            }
+            if (self.comparator)(&self.items[idx], &self.items[pdx]) {
+                self.items.swap(idx, pdx);
+            }
+            idx = pdx;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +71,7 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        0
     }
 }
 
@@ -84,8 +97,39 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        let back = self.len();
+        self.items.swap(back, 1);
+        let next = self.items.pop();
+        self.count -= 1;
+
+        if !self.is_empty() {
+            let mut idx = 1;
+            while self.children_present(idx) {
+                let cdx = {
+                    if self.right_child_idx(idx) > self.len() {
+                        self.left_child_idx(idx)
+                    } else {
+                        let right = self.right_child_idx(idx);
+                        let left = self.left_child_idx(idx);
+                        if (self.comparator)(&self.items[left], &self.items[right]) {
+                            left
+                        } else {
+                            right
+                        }
+                    }
+                };
+                if !(self.comparator)(&self.items[idx], &self.items[cdx]) {
+                    self.items.swap(idx, cdx);
+                }
+                idx = cdx
+            }
+        }
+
+        next
     }
 }
 
