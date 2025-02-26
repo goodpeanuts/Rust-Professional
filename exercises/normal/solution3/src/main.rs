@@ -6,7 +6,6 @@ fn main() {
     let probability = calc_logic::new_birthday_probability(n);
     println!(
         "在 {} 个人中，有两个人在同一天过生日的概率是 {:.4}",
-        n,
-        probability
+        n, probability
     );
 }
