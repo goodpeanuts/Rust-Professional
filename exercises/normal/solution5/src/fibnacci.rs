@@ -1,4 +1,12 @@
 pub fn odd_fibnacci_sum(threshold: u32) -> u32 {
-    // TODO: 这里写逻辑
-    todo!()
+    let mut res = 0;
+
+    let (mut x, mut y) = (0, 1);
+    while y < threshold {
+        (x, y) = (y, x + y);
+        if x % 2 == 1 {
+            res += x;
+        }
+    }
+    res
 }
