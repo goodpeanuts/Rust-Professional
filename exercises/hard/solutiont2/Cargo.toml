@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+rand = "0.8.4"
+num-bigint = "*"
+num-traits = "*"
+num-integer = "*"
 
 [[test]]
 name = "tests"
