@@ -4,7 +4,7 @@ mod retirement;
 #[cfg(test)]
 mod tests {
     use super::retirement::retire_time;
-    use std::time::{Instant, Duration};
+    use std::time::{Duration, Instant};
 
     // 定义测试用例和预期结果
     const TEST_CASES: &[(&str, &str, &str)] = &[

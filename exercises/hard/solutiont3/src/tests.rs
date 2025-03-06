@@ -4,7 +4,7 @@ mod district;
 #[cfg(test)]
 mod tests {
     use super::district::count_provinces;
-    use std::time::{Instant, Duration};
+    use std::time::{Duration, Instant};
 
     // 定义测试用例和预期结果
     const TEST_CASE: &str = "3,3,2,2,1";
