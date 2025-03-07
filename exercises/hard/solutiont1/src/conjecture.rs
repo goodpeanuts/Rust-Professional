@@ -1,89 +1,71 @@
-use std::{
-    sync::{LazyLock, Mutex},
-    vec,
-};
-
-static PRIMEAS: LazyLock<Mutex<Vec<bool>>> = LazyLock::new(|| {
-    let mut v = vec![true; 10240];
-    v[0] = false;
-    v[1] = false;
-    Mutex::new(v)
-});
-
-static THRESHOLD: LazyLock<Mutex<usize>> = LazyLock::new(|| Mutex::new(2));
-static TARGET: LazyLock<Mutex<usize>> = LazyLock::new(|| Mutex::new(3));
-
-static SQUARE: LazyLock<Mutex<Vec<usize>>> = LazyLock::new(|| Mutex::new(Vec::new()));
-static SQRT: LazyLock<Mutex<usize>> = LazyLock::new(|| Mutex::new(1));
+const MAX_N: usize = 100000;
 
 pub fn goldbach_conjecture() -> String {
-    sieve_of_eratosthenes();
+    let mut prime: Vec<usize> = Vec::new();
+    let mut is_prime: Vec<usize> = vec![0; MAX_N + 5];
 
-    let mut res = Vec::new();
-    let primes = PRIMEAS.lock().expect("get PRIMES failed");
-    let len = primes.len();
-    let mut target = *TARGET.lock().expect("get threshold failed");
-    let square = SQUARE.lock().expect("get square failed");
-    while target < len {
-        if !primes[target] {
-            let mut flag = true;
-            for (i, is_prime) in primes.iter().enumerate() {
-                if i >= target {
-                    break;
-                }
-                let rem = target - i;
-                let sq = if !*is_prime || rem % 2 == 1 {
-                    continue;
-                } else {
-                    rem / 2
-                };
-                if square.contains(&sq) {
-                    flag = false;
-                    break;
-                }
-            }
-            if flag {
-                res.push(target);
-                if res.len() == 2 {
-                    break;
-                }
-            }
+    for i in 2..=MAX_N {
+        if is_prime[i] == 0 {
+            prime.push(i);
         }
-        target += 2;
-    }
-    res.iter()
-        .map(|t| t.to_string())
-        .collect::<Vec<_>>()
-        .join(",")
-}
 
-fn sieve_of_eratosthenes() {
-    let mut primes = PRIMEAS.lock().expect("get PRIMES failed");
-    let mut threshold = THRESHOLD.lock().expect("get threshold failed");
-
-    let len = primes.len() * 2;
-    primes.resize(len, true);
-    let sqrt_max = (len as f64).sqrt() as usize;
-
-    for i in *threshold..=sqrt_max {
-        if primes[i] {
-            for j in (i * i..len).step_by(i) {
-                primes[j] = false;
+        for t in &prime {
+            let num = i * t;
+            if num > MAX_N {
+                break;
+            }
+            is_prime[num] = 1;
+            if i % t == 0 {
+                break;
             }
         }
     }
 
-    for (idx, is_prime) in primes.iter().rev().enumerate() {
-        if *is_prime {
-            *threshold = primes.len() - 1 - idx;
+    let mut answer: Vec<usize> = Vec::new();
+
+    for i in (9..=MAX_N).step_by(2) {
+        if is_prime[i] == 0 {
+            continue;
+        }
+        if check(i, &prime) {
+            continue;
+        }
+        answer.push(i);
+        if answer.len() >= 2 {
             break;
         }
     }
 
-    let mut square = SQUARE.lock().expect("get Square failed");
-    let mut sqrt = *SQRT.lock().expect("get sqrt failed");
-    while sqrt * sqrt <= len {
-        square.push(sqrt * sqrt);
-        sqrt += 1;
+    format!("{},{}", answer[0], answer[1])
+}
+
+fn check(n: usize, pr: &Vec<usize>) -> bool {
+    for it in pr {
+        if *it >= n {
+            break;
+        }
+
+        if binary_search(1, n - it, n - it) {
+            return true;
+        }
     }
+
+    false
+}
+
+fn binary_search(mut l: usize, mut r: usize, x: usize) -> bool {
+    if l > r {
+        return false;
+    }
+
+    let mid = (l + r) / 2;
+    let sqrt_2 = 2 * mid * mid;
+
+    match sqrt_2.cmp(&x) {
+        std::cmp::Ordering::Equal => return true,
+        std::cmp::Ordering::Less => l = mid + 1,
+        std::cmp::Ordering::Greater => r = mid - 1,
+    }
+
+    binary_search(l, r, x)
 }
